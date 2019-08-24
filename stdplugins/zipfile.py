@@ -37,7 +37,7 @@ async def _(event):
     zipf.close()
     await borg.send_file(
         event.chat_id,
-        directory_name + ".zip",
+        zipf,
         caption="Zipped By SnapDragon",
         force_document=True,
         allow_cache=False,
