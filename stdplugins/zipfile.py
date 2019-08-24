@@ -49,7 +49,7 @@ async def _(event):
                     display_message = current_message
             except Exception as e:
                 logger.info(str(e))
-    directory_name = "{}".format(downloaded_file_name.replace("`", "") 
+    directory_name = "{}".format(downloaded_file_name.replace("`", ""))
     ziping = zipfile.ZipFile(directory_name + ".zip", "w", zipfile.ZIP_DEFLATED)
     zipdir(directory_name, ziping)
     ziping.close()
