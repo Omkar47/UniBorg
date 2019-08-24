@@ -16,6 +16,7 @@ async def _(event):
     input_str = event.pattern_match.group(1)
     if "|" in input_str:
         lan, text = input_str.split("|")
+        pet = True
     elif event.reply_to_msg_id:
         previous_message = await event.get_reply_message()
         text = previous_message.message
@@ -31,12 +32,14 @@ async def _(event):
         after_tr_text = translated.text
         # TODO: emojify the :
         # either here, or before translation
-        output_str = """**TRANSLATED** from {} to {}
-{}""".format(
-            translated.src,
-            lan,
-            after_tr_text
-        )
+        if pet:
+            output_str = after_tr_text
+        else:
+            output_str = """**TRANSLATED** from {} to {}\n{}""".format(
+                translated.src,
+                lan,
+                after_tr_text
+            )
         await event.edit(output_str)
     except Exception as exc:
         await event.edit(str(exc))
