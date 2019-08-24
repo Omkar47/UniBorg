@@ -26,9 +26,9 @@ async def _(event):
                     progress(d, t, mone, "trying to download")
                 )
             )
+            directory_name = "{}".format(downloaded_file_name.replace("`", ""))
         except Exception as e:  # pylint:disable=C0103,W0703
             await mone.edit(str(e))
-    directory_name = "{}".format(downloaded_file_name.replace("`", ""))
     zipf = zipfile.ZipFile(directory_name + ".zip", "w", zipfile.ZIP_DEFLATED)
     zipdir(directory_name, zipf)
     zipf.close()
