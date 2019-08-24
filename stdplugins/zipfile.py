@@ -29,6 +29,7 @@ async def _(event):
                 )
             )
             directory_name = "{}".format(downloaded_file_name.replace("`", ""))
+            await event.edit("Download to local finished")
         except Exception as e:  # pylint:disable=C0103,W0703
             await mone.edit(str(e))
     zipf = zipfile.ZipFile(directory_name + ".zip", "w", zipfile.ZIP_DEFLATED)
@@ -41,14 +42,13 @@ async def _(event):
         force_document=True,
         allow_cache=False,
         reply_to=event.message.id,
-        progress_callback=progress
     )
     try:
         os.remove(directory_name + ".zip")
         os.remove(directory_name)
     except:
         pass
-        await event.edit("DONE!!!")
+    await event.edit("DONE!!!")
     await asyncio.sleep(3)
     await event.delete()
 
