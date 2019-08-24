@@ -28,8 +28,8 @@ async def _(event):
                     progress(d, t, mone, c_time, "trying to download")
                 )
             )
-            directory_name = "{}".format(downloaded_file_name.replace("`", ""))
-            await event.edit("Download to local finished")
+            directory_name = downloaded_file_name
+            await event.edit(downloaded_file_name)
         except Exception as e:  # pylint:disable=C0103,W0703
             await mone.edit(str(e))
     zipf = zipfile.ZipFile(directory_name + ".zip", "w", zipfile.ZIP_DEFLATED)
