@@ -34,13 +34,15 @@ async def _(event):
             await mone.edit(str(e))
     zipf = zipfile.ZipFile(directory_name + ".zip", "w", zipfile.ZIP_DEFLATED)
     zipdir(directory_name, zipf)
+    zipf.close()
     await borg.send_file(
         event.chat_id,
-        zipdir,
+        directory_name + ".zip",
         caption="Zipped By SnapDragon",
         force_document=True,
         allow_cache=False,
         reply_to=event.message.id,
+        progress_callback=progress
     )
     try:
         os.remove(directory_name + ".zip")
@@ -58,3 +60,7 @@ def zipdir(path, ziph):
         for file in files:
             ziph.write(os.path.join(root, file))
             os.remove(os.path.join(root, file))
+
+
+def progress(current, total):
+    logger.info("Uploaded: {} of {}\nCompleted {}".format(current, total, (current / total) * 100))
