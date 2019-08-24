@@ -37,16 +37,16 @@ async def _(event):
                 allow_cache=False,
                 reply_to=event.message.id,
             )
-                try:
-                    os.remove(directory_name + ".zip")
-                    os.remove(directory_name)
-                except:
+            try:
+                os.remove(directory_name + ".zip")
+                os.remove(directory_name)
+            except:
                     pass
-                await event.edit("task Completed")
-                await asyncio.sleep(3)
-                await event.delete()
-            except Exception as e:  # pylint:disable=C0103,W0703
-                await mone.edit(str(e))
+            await event.edit("task Completed")
+            await asyncio.sleep(3)
+            await event.delete()
+        except Exception as e:  # pylint:disable=C0103,W0703
+            await mone.edit(str(e))
     elif input_str:
         directory_name = input_str
         zipfile.ZipFile(directory_name + '.zip', 'w', zipfile.ZIP_DEFLATED).write(directory_name)
