@@ -32,7 +32,7 @@ async def _(event):
                 reply_message,
                 Config.TMP_DOWNLOAD_DIRECTORY,
                 progress_callback=lambda d, t: asyncio.get_event_loop().create_task(
-                    progress(d, t, mone, c_time, "DOWNLOADING")
+                    progress(d, t, mone, c_time, "trying to download")
                 )
             )
         except Exception as e:  # pylint:disable=C0103,W0703
@@ -55,10 +55,6 @@ async def _(event):
         downloader.start(blocking=False)
         c_time = time.time()
         while not downloader.isFinished():
-            # url
-            # downloaded_file_name
-            # mone
-            # c_time
             total_length = downloader.filesize if downloader.filesize else None
             downloaded = downloader.get_dl_size()
             display_message = ""
@@ -73,8 +69,8 @@ async def _(event):
                 round(percentage, 2))
             estimated_total_time = downloader.get_eta(human=True)
             try:
-                current_message = f"SNAPDRAGON DOWNLOADER\n\nURL: {url}\nFile Name: {file_name}\n{progress_str}\n{humanbytes(downloaded)} of {humanbytes(total_length)}\nETA: {estimated_total_time}"
-                if current_message != display_message:
+                current_message = f"trying to download\nURL: {url}\nFile Name: {file_name}\n{progress_str}\n{humanbytes(downloaded)} of {humanbytes(total_length)}\nETA: {estimated_total_time}"
+                if round(diff % 10.00) == 0 and current_message != display_message:
                     await mone.edit(current_message)
                     display_message = current_message
             except Exception as e:
