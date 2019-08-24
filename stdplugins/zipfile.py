@@ -14,7 +14,6 @@ async def _(event):
         await event.edit("Reply to a file to compress it.")
         return
     mone = await event.reply("Processing ...")
-    input_str = event.pattern_match.group(1)
     if not os.path.isdir(Config.TMP_DOWNLOAD_DIRECTORY):
         os.makedirs(Config.TMP_DOWNLOAD_DIRECTORY)
     if event.reply_to_msg_id:
