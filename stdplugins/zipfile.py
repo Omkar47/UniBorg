@@ -32,7 +32,7 @@ async def _(event):
             await event.edit(downloaded_file_name)
         except Exception as e:  # pylint:disable=C0103,W0703
             await mone.edit(str(e))
-    zipfile.ZipFile(directory_name + '.zip', 'w', ZIP.DEFLATED).write(directory_name)
+    zipfile.ZipFile(directory_name + '.zip', 'w', zipfile.ZIP_DEFLATED).write(directory_name)
     await borg.send_file(
         event.chat_id,
         directory_name + ".zip",
