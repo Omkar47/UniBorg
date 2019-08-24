@@ -43,11 +43,6 @@ async def _(event):
         allow_cache=False,
         reply_to=event.message.id,
     )
-    try:
-        os.remove(directory_name + ".zip")
-        os.remove(directory_name)
-    except:
-        pass
     await event.edit("DONE!!!")
     await asyncio.sleep(3)
     await event.delete()
