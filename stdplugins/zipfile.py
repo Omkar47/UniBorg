@@ -70,4 +70,11 @@ async def _(event):
         await event.edit("DONE!!!")
     await asyncio.sleep(3)
     await event.delete()
-    
+
+
+def zipdir(path, ziph):
+    # ziph is zipfile handle
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            ziph.write(os.path.join(root, file))
+            os.remove(os.path.join(root, file))
