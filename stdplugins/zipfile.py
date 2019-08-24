@@ -34,10 +34,9 @@ async def _(event):
             await mone.edit(str(e))
     zipf = zipfile.ZipFile(directory_name + ".zip", "w", zipfile.ZIP_DEFLATED)
     zipdir(directory_name, zipf)
-    zipf.close()
     await borg.send_file(
         event.chat_id,
-        zipf,
+        zipdir,
         caption="Zipped By SnapDragon",
         force_document=True,
         allow_cache=False,
