@@ -50,9 +50,9 @@ async def _(event):
             except Exception as e:
                 logger.info(str(e))
     directory_name = "{}".format(downloaded_file_name.replace("`", ""))
-    ziping = zipfile.ZipFile(directory_name + ".zip", "w", zipfile.ZIP_DEFLATED)
-    zipdir(directory_name, ziping)
-    ziping.close()
+    zipf = zipfile.ZipFile(directory_name + ".zip", "w", zipfile.ZIP_DEFLATED)
+    zipdir(directory_name, zipf)
+    zipf.close()
     await borg.send_file(
         event.chat_id,
         directory_name + ".zip",
