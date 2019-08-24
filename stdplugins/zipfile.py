@@ -42,7 +42,6 @@ async def _(event):
         force_document=True,
         allow_cache=False,
         reply_to=event.message.id,
-        progress_callback=progress
     )
     try:
         os.remove(directory_name + ".zip")
