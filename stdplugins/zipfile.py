@@ -14,7 +14,7 @@ async def _(event):
     if not event.is_reply:
         await event.edit("Reply to a file to compress it.")
         return
-    mone = await event.reply("Processing ...")
+    mone = await event.edit("Processing ...")
     if not os.path.isdir(Config.TMP_DOWNLOAD_DIRECTORY):
         os.makedirs(Config.TMP_DOWNLOAD_DIRECTORY)
     if event.reply_to_msg_id:
@@ -32,9 +32,7 @@ async def _(event):
             await event.edit(downloaded_file_name)
         except Exception as e:  # pylint:disable=C0103,W0703
             await mone.edit(str(e))
-    zipf = zipfile.ZipFile(directory_name + ".zip", "w", zipfile.ZIP_DEFLATED)
-    zipdir(directory_name, zipf)
-    zipf.close()
+    zipfile.ZipFile(directory_name + '.zip', 'w', ZIP.DEFLATED).write(directory_name)
     await borg.send_file(
         event.chat_id,
         directory_name + ".zip",
@@ -44,7 +42,7 @@ async def _(event):
         reply_to=event.message.id,
     )
     await event.edit("DONE!!!")
-    await asyncio.sleep(3)
+    await asyncio.sleep(7)
     await event.delete()
 
 
