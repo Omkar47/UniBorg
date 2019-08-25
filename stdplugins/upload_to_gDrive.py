@@ -34,7 +34,7 @@ CLIENT_SECRET = Config.G_DRIVE_CLIENT_SECRET
 OAUTH_SCOPE = "https://www.googleapis.com/auth/drive.file"
 # Redirect URI for installed apps, can be left as is
 REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob"
-parent_id = Config.GDRIVE_FOLDER_ID
+G_DRIVE_F_PARENT_ID = Config.GDRIVE_FOLDER_ID
 
 
 @borg.on(admin_cmd(pattern="ugdrive ?(.*)", allow_sudo=True))
