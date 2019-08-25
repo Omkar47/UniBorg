@@ -44,7 +44,10 @@ async def _(event):
     mone = await event.reply("Processing ...")
     if CLIENT_ID is None or CLIENT_SECRET is None:
         await mone.edit("This module requires credentials from https://da.gd/so63O. Aborting!")
-        return False
+        return
+    if Config.PRIVATE_GROUP_BOT_API_ID is None:
+        await event.edit("Please set the required environment variable `PRIVATE_GROUP_BOT_API_ID` for this plugin to work")
+        return
     input_str = event.pattern_match.group(1)
     if not os.path.isdir(Config.TMP_DOWNLOAD_DIRECTORY):
         os.makedirs(Config.TMP_DOWNLOAD_DIRECTORY)
@@ -81,11 +84,12 @@ async def _(event):
             return False
     # logger.info(required_file_name)
     if required_file_name:
+        #
+        if Config.G_DRIVE_AUTH_TOKEN_DATA is not None:
+            with open(G_DRIVE_TOKEN_FILE, "w") as t_file:
+                t_file.write(Config.G_DRIVE_AUTH_TOKEN_DATA)
         # Check if token file exists, if not create it by requesting authorization code
-        try:
-            with open(G_DRIVE_TOKEN_FILE) as f:
-                pass
-        except IOError:
+        if not os.path.isfile(G_DRIVE_TOKEN_FILE):
             storage = await create_token_file(G_DRIVE_TOKEN_FILE, event)
             http = authorize(G_DRIVE_TOKEN_FILE, storage)
         # Authorize, get file parameters, upload file and print out result URL for download
@@ -94,12 +98,13 @@ async def _(event):
         # required_file_name will have the full path
         # Sometimes API fails to retrieve starting URI, we wrap it.
         try:
-            g_drive_link = await upload_file(http, required_file_name, file_name, mime_type,mone,parent_id)
-            await mone.edit("__Successfully Uploaded File on G-Drive :__\n[{}]({})".format(file_name,g_drive_link))
+            g_drive_link = upload_file(http, required_file_name, file_name, mime_type, mone, parent_id)
+            await mone.edit(f"Here is your Google Drive link: {g_drive_link}")
         except Exception as e:
             await mone.edit(f"Exception occurred while uploading to gDrive {e}")
     else:
         await mone.edit("File Not found in local server. Give me a file path :((")
+
 
 @borg.on(admin_cmd(pattern="drivesch ?(.*)", allow_sudo=True))
 async def sch(event):
