@@ -68,7 +68,7 @@ async def _(event):
     
     
     
-@borg.on(admin_cmd("start")) 
+@borg.on(admin_cmd(pattern="start")) 
 
 async def _(event):
 
