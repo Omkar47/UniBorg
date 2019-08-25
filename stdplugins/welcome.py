@@ -55,28 +55,58 @@ async def _(event):
             update_previous_welcome(event.chat_id, current_message.id)
 
 
-@borg.on(admin_cmd(pattern="savewelcome"))  # pylint:disable=E0602
+@borg.on(admin_cmd("setwelcome"))  # pylint:disable=E0602
 async def _(event):
     if event.fwd_from:
         return
     msg = await event.get_reply_message()
     if msg and msg.media:
         bot_api_file_id = pack_bot_file_id(msg.media)
-        add_welcome_setting(event.chat_id, msg.message, True, 0, bot_api_file_id)
-        await event.edit("Welcome note saved. ")
+        if get_current_welcome_settings(event.chat_id):
+            rm_welcome_setting(event.chat_id)
+            add_welcome_setting(event.chat_id, msg.message, True, 0, bot_api_file_id)
+            await event.edit("Welcome Message updated. ")
+        else:
+            add_welcome_setting(event.chat_id, msg.message, True, 0, bot_api_file_id)
+            await event.edit("Welcome Message saved. ")
     else:
         input_str = event.text.split(None, 1)
-        add_welcome_setting(event.chat_id, input_str[1], True, 0)
-        await event.edit("Welcome note saved. ")
+        if get_current_welcome_settings(event.chat_id):
+            rm_welcome_setting(event.chat_id)
+            add_welcome_setting(event.chat_id, input_str[1], True, 0)
+            await event.edit("Welcome Message updated. ")
+        else:
+            add_welcome_setting(event.chat_id, input_str[1], True, 0)
+            await event.edit("Welcome Message saved. ")
 
 
-@borg.on(admin_cmd(pattern="clearwelcome"))  # pylint:disable=E0602
+@borg.on(admin_cmd("clearwelcome"))  # pylint:disable=E0602
 async def _(event):
     if event.fwd_from:
         return
     cws = get_current_welcome_settings(event.chat_id)
     rm_welcome_setting(event.chat_id)
     await event.edit(
-        "Welcome note cleared. " + \
+        "Welcome Message cleared. " + \
         "The previous welcome message was `{}`.".format(cws.custom_welcome_message)
     )
+    
+    
+@borg.on(admin_cmd("listwelcome"))  # pylint:disable=E0602
+async def _(event):
+    if event.fwd_from:
+        return
+    cws = get_current_welcome_settings(event.chat_id)
+    if hasattr(cws, 'custom_welcome_message'):
+        await event.edit(
+            "Welcome Message found.\n " + \
+            "Your Welcome Message is as follows:\n `{}`.".format(cws.custom_welcome_message)
+        )
+        return
+    else:
+        await event.edit(
+            "No Welcome Message found"
+        )
+         
+
+    
