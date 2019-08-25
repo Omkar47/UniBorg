@@ -99,6 +99,7 @@ class Uniborg(TelegramClient):
 
         mod.borg = self
         mod.logger = logging.getLogger(shortname)
+        mod.storage = self.storage(f"{self._name}/{shortname}")
         # declare Config and tgbot to be accessible by all modules
         mod.Config = self.config
         if self.config.TG_BOT_USER_NAME_BF_HER is not None:
