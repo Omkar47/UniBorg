@@ -34,7 +34,7 @@ CLIENT_SECRET = Config.G_DRIVE_CLIENT_SECRET
 OAUTH_SCOPE = "https://www.googleapis.com/auth/drive.file"
 # Redirect URI for installed apps, can be left as is
 REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob"
-G_DRIVE_F_PARENT_ID = Config.GDRIVE_FOLDER_ID
+parent_id = Config.GDRIVE_FOLDER_ID
 
 
 @borg.on(admin_cmd(pattern="ugdrive ?(.*)", allow_sudo=True))
@@ -44,10 +44,7 @@ async def _(event):
     mone = await event.reply("Processing ...")
     if CLIENT_ID is None or CLIENT_SECRET is None:
         await mone.edit("This module requires credentials from https://da.gd/so63O. Aborting!")
-        return
-    if Config.PRIVATE_GROUP_BOT_API_ID is None:
-        await event.edit("Please set the required environment variable `PRIVATE_GROUP_BOT_API_ID` for this plugin to work")
-        return
+        return False
     input_str = event.pattern_match.group(1)
     if not os.path.isdir(Config.TMP_DOWNLOAD_DIRECTORY):
         os.makedirs(Config.TMP_DOWNLOAD_DIRECTORY)
@@ -84,12 +81,11 @@ async def _(event):
             return False
     # logger.info(required_file_name)
     if required_file_name:
-        #
-        if Config.G_DRIVE_AUTH_TOKEN_DATA is not None:
-            with open(G_DRIVE_TOKEN_FILE, "w") as t_file:
-                t_file.write(Config.G_DRIVE_AUTH_TOKEN_DATA)
         # Check if token file exists, if not create it by requesting authorization code
-        if not os.path.isfile(G_DRIVE_TOKEN_FILE):
+        try:
+            with open(G_DRIVE_TOKEN_FILE) as f:
+                pass
+        except IOError:
             storage = await create_token_file(G_DRIVE_TOKEN_FILE, event)
             http = authorize(G_DRIVE_TOKEN_FILE, storage)
         # Authorize, get file parameters, upload file and print out result URL for download
@@ -98,13 +94,12 @@ async def _(event):
         # required_file_name will have the full path
         # Sometimes API fails to retrieve starting URI, we wrap it.
         try:
-            g_drive_link = upload_file(http, required_file_name, file_name, mime_type)
-            await mone.edit(f"Here is your Google Drive link: {g_drive_link}")
+            g_drive_link = await upload_file(http, required_file_name, file_name, mime_type,mone,parent_id)
+            await mone.edit("__Successfully Uploaded File on G-Drive :__\n[{}]({})".format(file_name,g_drive_link))
         except Exception as e:
             await mone.edit(f"Exception occurred while uploading to gDrive {e}")
     else:
         await mone.edit("File Not found in local server. Give me a file path :((")
-
 
 @borg.on(admin_cmd(pattern="drivesch ?(.*)", allow_sudo=True))
 async def sch(event):
@@ -123,7 +118,7 @@ async def sch(event):
     http = authorize(G_DRIVE_TOKEN_FILE, None)    
     input_str = event.pattern_match.group(1).strip()
     await event.edit("Searching for {} in G-Drive.".format(input_str))
-    query = "'{}' in parents and (title contains '{}')".format(G_DRIVE_F_PARENT_ID, input_str)#search_query(parent_id,input_str)
+    query = "'{}' in parents and (title contains '{}')".format(parent_id,input_str)#search_query(parent_id,input_str)
     msg = await gsearch(http,query,input_str)
     await event.edit(str(msg))
 
@@ -255,18 +250,18 @@ def authorize(token_file, storage):
     return http
 
 
-def upload_file(http, file_path, file_name, mime_type):
+async def upload_file(http, file_path, file_name, mime_type, event, parent_id):
     # Create Google Drive service instance
-    drive_service = build("drive", "v2", http=http)
+    drive_service = build("drive", "v2", http=http, cache_discovery=False)
     # File body description
     media_body = MediaFileUpload(file_path, mimetype=mime_type, resumable=True)
     body = {
         "title": file_name,
-        "description": "backup",
+        "description": "Uploaded using @UniBorg gDrive v2",
         "mimeType": mime_type,
     }
-    if G_DRIVE_F_PARENT_ID is not None:
-        body["parents"] = [{"id": G_DRIVE_F_PARENT_ID}]
+    if parent_id is not None:
+        body["parents"] = [{"id": parent_id}]
     # Permissions body description: anyone who has link can upload
     # Other permissions can be found at https://developers.google.com/drive/v2/reference/permissions
     permissions = {
@@ -276,11 +271,32 @@ def upload_file(http, file_path, file_name, mime_type):
         "withLink": True
     }
     # Insert a file
-    file = drive_service.files().insert(body=body, media_body=media_body).execute()
+    file = drive_service.files().insert(body=body, media_body=media_body)
+    response = None
+    display_message = ""
+    while response is None:
+        status, response = file.next_chunk()  #Credits: https://github.com/AvinashReddy3108/PaperplaneExtended/commit/df65da55d16a6563aa9023cac2bedf43248379f5
+        await asyncio.sleep(1)
+        if status:
+            percentage = int(status.progress() * 100)
+            progress_str = "[{0}{1}]\nProgress: {2}%\n".format(
+                "".join(["█" for i in range(math.floor(percentage / 5))]),
+                "".join(["░" for i in range(20 - math.floor(percentage / 5))]),
+                round(percentage, 2)
+            )
+            current_message = f"Uploading to G-Drive\nFile Name: `{file_name}`\n{progress_str}"
+            if display_message != current_message:
+                try:
+                    await event.edit(current_message)
+                    display_message = current_message
+                except Exception as e:
+                    logger.info(str(e))
+                    pass
+    file_id = response.get("id")
     # Insert new permissions
-    drive_service.permissions().insert(fileId=file["id"], body=permissions).execute()
+    drive_service.permissions().insert(fileId=file_id, body=permissions).execute()
     # Define file instance and get url for download
-    file = drive_service.files().get(fileId=file["id"]).execute()
+    file = drive_service.files().get(fileId=file_id).execute()
     download_url = file.get("webContentLink")
     return download_url
 
