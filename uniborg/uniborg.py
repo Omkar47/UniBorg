@@ -10,6 +10,7 @@ from telethon import TelegramClient
 import telethon.utils
 import telethon.events
 
+from .storage import Storage
 from . import hacks
 
 
