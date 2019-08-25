@@ -14,7 +14,7 @@ last_afk_message = {}  # pylint:disable=E0602
 @borg.on(events.NewMessage(outgoing=True))  # pylint:disable=E0602
 async def set_not_afk(event):
     current_message = event.message.message
-    if ".afk" not in current_message:  # pylint:disable=E0602
+    if ".afk" not in current_message and "yes" in USER_AFK:  # pylint:disable=E0602
         try:
             await borg.send_message(  # pylint:disable=E0602
                 Config.PRIVATE_GROUP_BOT_API_ID,  # pylint:disable=E0602
@@ -29,7 +29,7 @@ async def set_not_afk(event):
                 reply_to=event.message.id,
                 silent=True
             )
-        USER_AFK = False  # pylint:disable=E0602
+        USER_AFK.update("no")  # pylint:disable=E0602
         afk_time = None  # pylint:disable=E0602
 
 
@@ -46,7 +46,7 @@ async def _(event):
         )
         if isinstance(last_seen_status.rules, types.PrivacyValueAllowAll):
             afk_time = datetime.datetime.now()  # pylint:disable=E0602
-        USER_AFK.update({"yes": reason})  # pylint:disable=E0602
+        USER_AFK.update("yes")  # pylint:disable=E0602
         if reason:
             await event.edit(f"Set AFK mode to True, and Reason is {reason}")
         else:
