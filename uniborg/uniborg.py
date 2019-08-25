@@ -15,9 +15,10 @@ from . import hacks
 
 class Uniborg(TelegramClient):
     def __init__(
-            self, session, *, n_plugin_path="plugins", db_plugin_path="plugins",
+            self, session, *, n_plugin_path="plugins", storage=None, db_plugin_path="plugins",
             bot_token=None, api_config=None, **kwargs):
         self._name = "LoggedIn"
+        self.storage = storage or (lambda n: Storage(Path("data") / n))
         self._logger = logging.getLogger("UniBorg")
         self._plugins = {}
         self.n_plugin_path = n_plugin_path
@@ -99,6 +100,7 @@ class Uniborg(TelegramClient):
 
         mod.borg = self
         mod.logger = logging.getLogger(shortname)
+        mod.storage = self.storage(f"{self._name}/{shortname}")
         # declare Config and tgbot to be accessible by all modules
         mod.Config = self.config
         if self.config.TG_BOT_USER_NAME_BF_HER is not None:
