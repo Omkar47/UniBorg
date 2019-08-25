@@ -123,7 +123,7 @@ async def sch(event):
     http = authorize(G_DRIVE_TOKEN_FILE, None)    
     input_str = event.pattern_match.group(1).strip()
     await event.edit("Searching for {} in G-Drive.".format(input_str))
-    query = "'{}' in parents and (title contains '{}')".format(parent_id,input_str)#search_query(parent_id,input_str)
+    query = "'{}' in parents and (title contains '{}')".format(G_DRIVE_F_PARENT_ID, input_str)#search_query(parent_id,input_str)
     msg = await gsearch(http,query,input_str)
     await event.edit(str(msg))
 
