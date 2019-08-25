@@ -21,6 +21,7 @@ async def _(event):
         previous_message = await event.get_reply_message()
         text = previous_message.message
         lan = input_str or "ml"
+        pet = False
     else:
         await event.edit("`.tr LanguageCode` as reply to a message")
         return
