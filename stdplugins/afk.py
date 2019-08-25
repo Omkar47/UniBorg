@@ -6,9 +6,9 @@ from telethon import events
 from telethon.tl import functions, types
 
 
-borg.storage.USER_AFK = {}  # pylint:disable=E0602
-borg.storage.afk_time = None  # pylint:disable=E0602
-borg.storage.last_afk_message = {}  # pylint:disable=E0602
+USER_AFK = {}  # pylint:disable=E0602
+afk_time = None  # pylint:disable=E0602
+last_afk_message = {}  # pylint:disable=E0602
 
 
 @borg.on(events.NewMessage(outgoing=True))  # pylint:disable=E0602
