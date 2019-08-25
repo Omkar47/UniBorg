@@ -106,6 +106,7 @@ class Config(object):
     GDRIVE_FOLDER_ID = os.environ.get("GDRIVE_FOLDER_ID", None)
     G_DRIVE_AUTH_TOKEN_DATA = os.environ.get("G_DRIVE_AUTH_TOKEN_DATA", None)
     YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY", None)
+    GDRIVE_FOLDER_ID = os.environ.get("GDRIVE_FOLDER_ID", None)
     
 
 class Production(Config):
