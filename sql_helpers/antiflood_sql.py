@@ -90,3 +90,4 @@ def __load_flood_settings():
         SESSION.close()
     return CHAT_FLOOD
 
+
