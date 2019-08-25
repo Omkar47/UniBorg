@@ -13,7 +13,7 @@ last_afk_message = {}  # pylint:disable=E0602
 
 @borg.on(events.NewMessage(outgoing=True))  # pylint:disable=E0602
 async def set_not_afk(event):
-    current_message = event.NewMessage
+    current_message = event.NewMessage(outgoing=True)
     if ".afk" not in current_message:  # pylint:disable=E0602
         try:
             await borg.send_message(  # pylint:disable=E0602
