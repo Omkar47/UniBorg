@@ -255,18 +255,18 @@ def authorize(token_file, storage):
     return http
 
 
-async def upload_file(http, file_path, file_name, mime_type, event, parent_id):
+def upload_file(http, file_path, file_name, mime_type):
     # Create Google Drive service instance
-    drive_service = build("drive", "v2", http=http, cache_discovery=False)
+    drive_service = build("drive", "v2", http=http)
     # File body description
     media_body = MediaFileUpload(file_path, mimetype=mime_type, resumable=True)
     body = {
         "title": file_name,
-        "description": "Uploaded using @UniBorg gDrive v2",
+        "description": "backup",
         "mimeType": mime_type,
     }
-    if parent_id is not None:
-        body["parents"] = [{"id": parent_id}]
+    if G_DRIVE_F_PARENT_ID is not None:
+        body["parents"] = [{"id": G_DRIVE_F_PARENT_ID}]
     # Permissions body description: anyone who has link can upload
     # Other permissions can be found at https://developers.google.com/drive/v2/reference/permissions
     permissions = {
@@ -276,32 +276,11 @@ async def upload_file(http, file_path, file_name, mime_type, event, parent_id):
         "withLink": True
     }
     # Insert a file
-    file = drive_service.files().insert(body=body, media_body=media_body)
-    response = None
-    display_message = ""
-    while response is None:
-        status, response = file.next_chunk()  #Credits: https://github.com/AvinashReddy3108/PaperplaneExtended/commit/df65da55d16a6563aa9023cac2bedf43248379f5
-        await asyncio.sleep(1)
-        if status:
-            percentage = int(status.progress() * 100)
-            progress_str = "[{0}{1}]\nProgress: {2}%\n".format(
-                "".join(["█" for i in range(math.floor(percentage / 5))]),
-                "".join(["░" for i in range(20 - math.floor(percentage / 5))]),
-                round(percentage, 2)
-            )
-            current_message = f"Uploading to G-Drive\nFile Name: `{file_name}`\n{progress_str}"
-            if display_message != current_message:
-                try:
-                    await event.edit(current_message)
-                    display_message = current_message
-                except Exception as e:
-                    logger.info(str(e))
-                    pass
-    file_id = response.get("id")
+    file = drive_service.files().insert(body=body, media_body=media_body).execute()
     # Insert new permissions
-    drive_service.permissions().insert(fileId=file_id, body=permissions).execute()
+    drive_service.permissions().insert(fileId=file["id"], body=permissions).execute()
     # Define file instance and get url for download
-    file = drive_service.files().get(fileId=file_id).execute()
+    file = drive_service.files().get(fileId=file["id"]).execute()
     download_url = file.get("webContentLink")
     return download_url
 
