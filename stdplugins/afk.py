@@ -29,7 +29,7 @@ async def set_not_afk(event):
                 reply_to=event.message.id,
                 silent=True
             )
-        USER_AFK = {}  # pylint:disable=E0602
+        USER_AFK = False  # pylint:disable=E0602
         afk_time = None  # pylint:disable=E0602
 
 
