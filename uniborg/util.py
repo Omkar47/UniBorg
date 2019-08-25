@@ -19,8 +19,7 @@ else:
         from config import Development as Config
 
 
-def admin_cmd(**args):
-    pattern = args.get("pattern", None)
+def admin_cmd(pattern=None, **args):
     allow_sudo = args.get("allow_sudo", False)
 
     # get the pattern from the decorator
