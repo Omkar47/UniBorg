@@ -10,18 +10,18 @@ Syntax:
 import asyncio
 import os
 import time
+import math
 from datetime import datetime
-from re import sub
 from telethon import events
 from uniborg.util import admin_cmd, progress
 #
-from mimetypes import guess_type
 from apiclient.discovery import build
 from apiclient.http import MediaFileUpload
 from apiclient.errors import ResumableUploadError
 from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.file import Storage
 from oauth2client import file, client, tools
+from mimetypes import guess_type
 import httplib2
 
 
@@ -34,8 +34,7 @@ CLIENT_SECRET = Config.G_DRIVE_CLIENT_SECRET
 OAUTH_SCOPE = "https://www.googleapis.com/auth/drive.file"
 # Redirect URI for installed apps, can be left as is
 REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob"
-# global variable to set Folder ID to upload to
-G_DRIVE_F_PARENT_ID = None
+parent_id = Config.GDRIVE_FOLDER_ID
 
 
 @borg.on(admin_cmd(pattern="ugdrive ?(.*)", allow_sudo=True))
@@ -45,10 +44,7 @@ async def _(event):
     mone = await event.reply("Processing ...")
     if CLIENT_ID is None or CLIENT_SECRET is None:
         await mone.edit("This module requires credentials from https://da.gd/so63O. Aborting!")
-        return
-    if Config.PRIVATE_GROUP_BOT_API_ID is None:
-        await event.edit("Please set the required environment variable `PRIVATE_GROUP_BOT_API_ID` for this plugin to work")
-        return
+        return False
     input_str = event.pattern_match.group(1)
     if not os.path.isdir(Config.TMP_DOWNLOAD_DIRECTORY):
         os.makedirs(Config.TMP_DOWNLOAD_DIRECTORY)
@@ -85,83 +81,131 @@ async def _(event):
             return False
     # logger.info(required_file_name)
     if required_file_name:
-        #
-        if Config.G_DRIVE_AUTH_TOKEN_DATA is not None:
-            with open(G_DRIVE_TOKEN_FILE, "w") as t_file:
-                t_file.write(Config.G_DRIVE_AUTH_TOKEN_DATA)
         # Check if token file exists, if not create it by requesting authorization code
-        storage = None
-        if not os.path.isfile(G_DRIVE_TOKEN_FILE):
+        try:
+            with open(G_DRIVE_TOKEN_FILE) as f:
+                pass
+        except IOError:
             storage = await create_token_file(G_DRIVE_TOKEN_FILE, event)
-        http = authorize(G_DRIVE_TOKEN_FILE, storage)
+            http = authorize(G_DRIVE_TOKEN_FILE, storage)
         # Authorize, get file parameters, upload file and print out result URL for download
-        # http = authorize(G_DRIVE_TOKEN_FILE, None)
+        http = authorize(G_DRIVE_TOKEN_FILE, None)
         file_name, mime_type = file_ops(required_file_name)
         # required_file_name will have the full path
         # Sometimes API fails to retrieve starting URI, we wrap it.
         try:
-            g_drive_link = await upload_file(http, required_file_name, file_name, mime_type, mone, G_DRIVE_F_PARENT_ID)
-            await mone.edit(f"Here is your Google Drive link: {g_drive_link}")
+            g_drive_link = await upload_file(http, required_file_name, file_name, mime_type,mone,parent_id)
+            await mone.edit("__Successfully Uploaded File on G-Drive :__\n[{}]({})".format(file_name,g_drive_link))
         except Exception as e:
             await mone.edit(f"Exception occurred while uploading to gDrive {e}")
     else:
         await mone.edit("File Not found in local server. Give me a file path :((")
 
-
-@borg.on(admin_cmd(pattern="gdrivesp https?://drive\.google\.com/drive/u/\d/folders/([-\w]{25,})", allow_sudo=True))
-async def _(event):
+@borg.on(admin_cmd(pattern="drivesch ?(.*)", allow_sudo=True))
+async def sch(event):
     if event.fwd_from:
         return
-    mone = await event.reply("Processing ...")
-    input_str = event.pattern_match.group(1)
-    if input_str:
-        G_DRIVE_F_PARENT_ID = input_str
-        await mone.edit("Custom Folder ID set successfully. The next uploads will upload to {G_DRIVE_F_PARENT_ID} till `.gdriveclear`")
-        await event.delete()
-    else:
-        await mone.edit("Send `.gdrivesp https://drive.google.com/drive/u/X/folders/Y` to set the folder to upload new files to")
+    if CLIENT_ID is None or CLIENT_SECRET is None:
+        await mone.edit("This module requires credentials from https://da.gd/so63O. Aborting!")
+        return False    
+    try:
+        with open(G_DRIVE_TOKEN_FILE) as f:
+            pass
+    except IOError:
+        storage = await create_token_file(G_DRIVE_TOKEN_FILE, event)
+        http = authorize(G_DRIVE_TOKEN_FILE, storage)
+        # Authorize, get file parameters, upload file and print out result URL for download
+    http = authorize(G_DRIVE_TOKEN_FILE, None)    
+    input_str = event.pattern_match.group(1).strip()
+    await event.edit("Searching for {} in G-Drive.".format(input_str))
+    query = "'{}' in parents and (title contains '{}')".format(parent_id,input_str)#search_query(parent_id,input_str)
+    msg = await gsearch(http,query,input_str)
+    await event.edit(str(msg))
 
 
-@borg.on(admin_cmd(pattern="gdriveclear", allow_sudo=True))
-async def _(event):
-    if event.fwd_from:
-        return
-    mone = await event.reply("Processing ...")
-    G_DRIVE_F_PARENT_ID = None
-    await mone.edit("Custom Folder ID cleared successfully.")
-    await event.delete()
+async def gsearch(http,query,filename):
+    drive_service = build("drive", "v2", http=http)
+    page_token = None
+    msg = "**G-Drive Search Query**\n`"+filename+"`\n**Results**\n"
+    while True:
+        response = drive_service.files().list(q=query,
+                                          spaces='drive',
+                                          fields='nextPageToken, items(id, title, mimeType)',
+                                          pageToken=page_token).execute()
+        for file in response.get('items',[]):
+            if file.get('mimeType') == "application/vnd.google-apps.folder":
+                msg +="⁍ [{}](https://drive.google.com/drive/folders/{}) (folder)".format(file.get('title'),file.get('id'))+"\n"
+            # Process change
+            else:
+                msg += "⁍ [{}](https://drive.google.com/uc?id={}&export=download)".format(file.get('title'),file.get('id'))+"\n"
+        page_token = response.get('nextPageToken', None)
+        if page_token is None:
+            break
+    return msg        
+
+
+
+
 
 
 @borg.on(admin_cmd(pattern="gdrivedir ?(.*)", allow_sudo=True))
 async def _(event):
     if event.fwd_from:
         return
-    mone = await event.reply("Processing ...")
-    if CLIENT_ID is None or CLIENT_SECRET is None:
-        await mone.edit("This module requires credentials from https://da.gd/so63O. Aborting!")
-        return
-    if Config.PRIVATE_GROUP_BOT_API_ID is None:
-        await event.edit("Please set the required environment variable `PRIVATE_GROUP_BOT_API_ID` for this plugin to work")
-        return
-    input_str = event.pattern_match.group(1)
-    if os.path.isdir(input_str):
-        # TODO: remove redundant code
-        #
-        if Config.G_DRIVE_AUTH_TOKEN_DATA is not None:
-            with open(G_DRIVE_TOKEN_FILE, "w") as t_file:
-                t_file.write(Config.G_DRIVE_AUTH_TOKEN_DATA)
-        # Check if token file exists, if not create it by requesting authorization code
-        storage = None
-        if not os.path.isfile(G_DRIVE_TOKEN_FILE):
-            storage = await create_token_file(G_DRIVE_TOKEN_FILE, event)
+    try:
+        with open(G_DRIVE_TOKEN_FILE) as f:
+            pass
+    except IOError:
+        storage = await create_token_file(G_DRIVE_TOKEN_FILE, event)
         http = authorize(G_DRIVE_TOKEN_FILE, storage)
         # Authorize, get file parameters, upload file and print out result URL for download
-        dir_id = await DoTeskWithDir(http, input_str, mone, G_DRIVE_F_PARENT_ID)
-        dir_link = "https://drive.google.com/folderview?id={}".format(dir_id)
-        await mone.edit(f"[Here is your Google Drive link]({dir_link})")
+    http = authorize(G_DRIVE_TOKEN_FILE, None)    
+    input_str = event.pattern_match.group(1).strip()
+    if os.path.exists(input_str):
+        await event.edit("`Directory Found. Started Upload..Please Wait`")
+        folder_link,new_folder_id = create_folder(http=http,folder_name=input_str.replace("."," "),parent_folder_id=parent_id)
+        up_files = walk_fs(input_str)
+        await event.edit("`Uploading {} Files To G-Drive.`".format(len(up_files)))
+        for file in walk_fs(input_str):
+            file_name,mime_type =file_ops(file)
+            await upload_file(http,file,file_name,mime_type,event,new_folder_id)
+        await event.edit("__Successfully Uploaded Folder To G-Drive:__\n⁍ [{}]({}) ".format(input_str,folder_link))   
     else:
-        await mone.edit(f"directory {input_str} does not seem to exist")
+        await event.edit("`404 : Folder Not Found !!`")
+        return
 
+
+
+def walk_fs(folder_path):
+    file_paths = []
+    for root, dirs, files in os.walk(folder_path):
+        for name in files:
+            file_paths.append(os.path.join(root, name))
+    return file_paths        
+
+
+def create_folder(http, folder_name, parent_folder_id):
+    """ 
+        Create folder on Google Drive
+    """
+    drive_service = build("drive", "v2", http=http)
+    permissions = {
+        "role": "reader",
+        "type": "anyone",
+        "value": None,
+        "withLink": True
+    }
+    file_metadata = {
+    'title': folder_name,
+    'mimeType': 'application/vnd.google-apps.folder',
+    }
+    if parent_id:
+        file_metadata[ 'parents' ] = [{'id': parent_id}]
+    file = drive_service.files().insert(body=file_metadata).execute()
+    drive_service.permissions().insert(fileId=file["id"], body=permissions).execute()
+    print("Created Gdrive Folder:\nName: {}\nID: {} ".format(file.get('title'),file.get('id')))
+    folder_link = "https://drive.google.com/folderview?id={}".format(file.get('id'))
+    return folder_link,file.get('id')
 
 # Get mime type and name of given file
 def file_ops(file_path):
@@ -231,7 +275,7 @@ async def upload_file(http, file_path, file_name, mime_type, event, parent_id):
     response = None
     display_message = ""
     while response is None:
-        status, response = file.next_chunk()
+        status, response = file.next_chunk()  #Credits: https://github.com/AvinashReddy3108/PaperplaneExtended/commit/df65da55d16a6563aa9023cac2bedf43248379f5
         await asyncio.sleep(1)
         if status:
             percentage = int(status.progress() * 100)
@@ -240,7 +284,7 @@ async def upload_file(http, file_path, file_name, mime_type, event, parent_id):
                 "".join(["░" for i in range(20 - math.floor(percentage / 5))]),
                 round(percentage, 2)
             )
-            current_message = f"uploading to gDrive\nFile Name: {file_name}\n{progress_str}"
+            current_message = f"Uploading to G-Drive\nFile Name: `{file_name}`\n{progress_str}"
             if display_message != current_message:
                 try:
                     await event.edit(current_message)
@@ -257,43 +301,9 @@ async def upload_file(http, file_path, file_name, mime_type, event, parent_id):
     return download_url
 
 
-async def create_directory(http, directory_name, parent_id):
-    drive_service = build("drive", "v2", http=http, cache_discovery=False)
-    permissions = {
-        "role": "reader",
-        "type": "anyone",
-        "value": None,
-        "withLink": True
-    }
-    file_metadata = {
-        "title": directory_name,
-        "mimeType": "application/vnd.google-apps.folder"
-    }
-    if parent_id is not None:
-        file_metadata["parents"] = [{"id": parent_id}]
-    file = drive_service.files().insert(body=file_metadata).execute()
-    file_id = file.get("id")
-    drive_service.permissions().insert(fileId=file_id, body=permissions).execute()
-    logger.info("Created Gdrive Folder:\nName: {}\nID: {} ".format(file.get("title"), file_id))
-    return file_id
-
-
-async def DoTeskWithDir(http, input_directory, event, parent_id):
-    list_dirs = os.listdir(input_directory)
-    if len(list_dirs) == 0:
-        return parent_id
-    r_p_id = None
-    for a_c_f_name in list_dirs:
-        current_file_name = os.path.join(input_directory, a_c_f_name)
-        if os.path.isdir(current_file_name):
-            current_dir_id = await create_directory(http, a_c_f_name, parent_id)
-            r_p_id = await DoTeskWithDir(http, current_file_name, event, current_dir_id)
-        else:
-            file_name, mime_type = file_ops(current_file_name)
-            # current_file_name will have the full path
-            g_drive_link = await upload_file(http, current_file_name, file_name, mime_type, event, parent_id)
-            r_p_id = parent_id
-    # TODO: there is a #bug here :(
-    return r_p_id
-
-
+@borg.on(admin_cmd(pattern="gfolder ?(.*)", allow_sudo=True))
+async def _(event):
+    if event.fwd_from:
+        return
+    folder_link = "https://drive.google.com/folderview?id="+parent_id    
+    await event.edit("`Here is Your G-Drive Folder link : `\n"+folder_link)    
