@@ -1,10 +1,8 @@
 """
 Carbon Scraper Plugin for Userbot. //text in creative way.
 usage: .carbon //as a reply to any text message
-
 Thanks to @AvinashReddy3108 for a Base Plugin.
 Go and Do a star on his repo: https://github.com/AvinashReddy3108/PaperplaneExtended/
-
 """
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.chrome.options import Options
@@ -50,12 +48,12 @@ async def carbon_api(e):
    command_result = driver.execute("send_command", params)
 
    driver.find_element_by_xpath("//button[contains(text(),'Export')]").click()
-   sleep(1) # this might take a bit.
+   sleep(5) # this might take a bit.
    driver.find_element_by_xpath("//button[contains(text(),'4x')]").click()
-   sleep(1)
+   sleep(5)
    await e.edit("Processing 50%")
    driver.find_element_by_xpath("//button[contains(text(),'PNG')]").click()
-   sleep(1) #Waiting for downloading
+   sleep(5) #Waiting for downloading
 
    await e.edit("Processing 90%")
    file = './carbon.png'
@@ -63,8 +61,8 @@ async def carbon_api(e):
    await e.client.send_file(
          e.chat_id,
          file,
-         caption="《《CARBON BY SNAPDRAGON》》",
-         force_document=False,
+         caption="Made using [Carbon](https://carbon.now.sh/about/), a project by [Dawn Labs](https://dawnlabs.io/)",
+         force_document=True,
          reply_to=e.message.reply_to_msg_id,
          )
 
