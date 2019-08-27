@@ -1,5 +1,6 @@
 from telethon import events
 from uniborg.util import admin_cmd
+import asyncio
 
 
 @borg.on(admin_cmd(pattern="undlt"))
@@ -13,3 +14,5 @@ async def _(event):
           await event.reply(i.original.action.message)
     else:
         await event.edit("You need administrative permissions in order to do this command")
+        await asyncio.sleep(3)
+        await event.delete()
