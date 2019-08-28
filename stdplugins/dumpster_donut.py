@@ -3,15 +3,15 @@ import asyncio
 from uniborg.util import admin_cmd
 
 
-@borg.on(admin_cmd(pattern="ddonut ?(.*)"))
+@borg.on(admin_cmd(pattern="dump ?(.*)"))
 async def _(message):
     try:
-        obj = message.pattern_match.group(1)
+        obj = "---"
         if len(obj) != 3:
             raise IndexError
-        inp = ' ' + obj
+        inp = ' '.join(obj)
     except IndexError:
-        inp = '💻 💻 💻'
+        inp = 'message.pattern_match.group(1)'
     u, t, g, o, s, n = inp.split(), '🗑', '<(^_^ <)', '(> ^_^)>', '⠀ ', '\n'
     h = [(u[0], u[1], u[2]), (u[0], u[1], ''), (u[0], '', '')]
     for something in reversed([y for y in ([''.join(x) for x in (
