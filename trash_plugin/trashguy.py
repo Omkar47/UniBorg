@@ -24,9 +24,12 @@
 import sys
 
 
-def main():
+def main(input_default):
     """Example usage of TrashGuy class."""
-    input_default = '🍓 🍅 🍊 🍋'.split()
+    if input_default is None:
+        input_default = '🍓 🍅 🍊 🍋'.split()
+    else:
+        input_default = input_default.split()
 
     user_input = sys.argv[1:]
     if not user_input:
