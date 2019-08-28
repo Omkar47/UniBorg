@@ -30,7 +30,7 @@ async def _(message):
 
             
 @borg.on(admin_cmd(pattern="dumpall ?(.*)"))
-aync def _(event):
+async def _(event):
     if event.fwd_from:
         return
     from trash_plugin.trashguy import TrashGuy
