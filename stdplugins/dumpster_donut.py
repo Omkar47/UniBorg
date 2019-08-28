@@ -6,10 +6,10 @@ from uniborg.util import admin_cmd
 @borg.on(admin_cmd(pattern="ddonut ?(.*)"))
 async def _(message):
     try:
-        obj = event.pattern_match.group(1)
+        obj = message.pattern_match.group(1)
         if len(obj) != 3:
             raise IndexError
-        inp = ' '.join(obj)
+        inp = ' ' + obj
     except IndexError:
         inp = '💻 💻 💻'
     u, t, g, o, s, n = inp.split(), '🗑', '<(^_^ <)', '(> ^_^)>', '⠀ ', '\n'
