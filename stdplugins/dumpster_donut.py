@@ -3,10 +3,10 @@ import asyncio
 from uniborg.util import admin_cmd
 
 
-@borg.on(admin_cmd(pattern=".ddonut"))
+@borg.on(admin_cmd(pattern="ddonut ?(.*)"))
 async def _(message):
     try:
-        obj = msg.split()[1:4]
+        obj = event.pattern_match.group(1)
         if len(obj) != 3:
             raise IndexError
         inp = ' '.join(obj)
