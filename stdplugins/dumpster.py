@@ -11,7 +11,7 @@ async def _(message):
             raise IndexError
         inp = ' '.join(obj)
     except IndexError:
-        inp = '🥞🎂🍫'
+        inp = "🥞 🎂 🍫"
     u, t, g, o, s, n = inp.split(), '🗑', '<(^_^ <)', '(> ^_^)>', '⠀ ', '\n'
     h = [(u[0], u[1], u[2]), (u[0], u[1], ''), (u[0], '', '')]
     for something in reversed([y for y in ([''.join(x) for x in (
