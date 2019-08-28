@@ -33,7 +33,7 @@ def main():
         user_input = input_default
 
     trash_guy = TrashGuy(user_input).animate()
-    print(*trash_guy, sep='\n')
+    return message.edit(*trash_guy, sep='\n')
 
 
 class TrashGuy:
