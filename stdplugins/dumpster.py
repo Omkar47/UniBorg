@@ -27,3 +27,15 @@ async def _(message):
                 await message.edit(something_else)
             except errors.MessageIdInvalidError:
                 return
+
+            
+@borg.on(admin_cmd(pattern="dumpall ?(.*)"))
+aync def _(event):
+    if event.fwd_from:
+        return
+    from trash_plugin.trashguy import TrashGuy
+    an = TrashGuy(event.pattern_match.group(1))
+    for i in an:
+      await event.edit(i)
+      await asyncio.sleep(0.3)
+    
