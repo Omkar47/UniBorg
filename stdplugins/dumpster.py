@@ -29,11 +29,11 @@ async def _(message):
                 return
 
             
-@borg.on(admin_cmd(pattern="dumpall ?(.*)"))
+@borg.on(admin_cmd(pattern="dump all ?(.*)"))
 async def _(event):
     if event.fwd_from:
         return
-    from trash_plugin.trashguy import TrashGuy
+    from extra_util.trashguy import TrashGuy
     an = TrashGuy(event.pattern_match.group(1))
     for i in an:
       await event.edit(i)
