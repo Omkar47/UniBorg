@@ -1,6 +1,6 @@
 {
   "name": "UniBorg",
-  "description": "Modular UserBot powered by @TelethonChat!",
+  "description": "Powerful UserBot Modded By SNAPDRAGON",
   "logo": "https://telegra.ph/file/6ce444f5ba54d79fb8622.jpg",
   "keywords": [
     "telegram",
@@ -9,7 +9,7 @@
     "modular",
     "productivity"
   ],
-  "repository": "https://gitlab.com/SpEcHiDe/UniBorg",
+  "repository": "https://github.com/SnapDragon7410/UniBorg",
   "website": "https://telegram.dog/UniBorg",
   "success_url": "https://t.me/UniBorg/5",
   "env": {
