@@ -85,7 +85,7 @@ async def on_afk(event):
         # https://core.telegram.org/bots/faq#why-doesn-39t-my-bot-see-messages-from-other-bots
         return False
     if USER_AFK and not (await event.get_sender()).bot:  # pylint:disable=E0602
-        reason = USER_AFK["yes"]  # pylint:disable=E0602
+        reason = USER_AFK[1]  # pylint:disable=E0602
         if afk_time:  # pylint:disable=E0602
             now = datetime.datetime.now()
             datime_since_afk = now - afk_time  # pylint:disable=E0602
