@@ -43,6 +43,7 @@ async def _(event):
     global USER_AFK  # pylint:disable=E0602
     global afk_time  # pylint:disable=E0602
     global last_afk_message  # pylint:disable=E0602
+    global reason
     USER_AFK = {}
     afk_time = None
     last_afk_message = {}
@@ -55,7 +56,7 @@ async def _(event):
         )
         if isinstance(last_seen_status.rules, types.PrivacyValueAllowAll):
             afk_time = datetime.datetime.now()  # pylint:disable=E0602
-        USER_AFK = f"yes : {reason}"  # pylint:disable=E0602
+        USER_AFK = f"yes: {reason}"  # pylint:disable=E0602
         if reason:
             await event.edit(f"Set AFK mode to True, and Reason is {reason}")
         else:
@@ -85,7 +86,6 @@ async def on_afk(event):
         # https://core.telegram.org/bots/faq#why-doesn-39t-my-bot-see-messages-from-other-bots
         return False
     if USER_AFK and not (await event.get_sender()).bot:  # pylint:disable=E0602
-        reason = USER_AFK[1]  # pylint:disable=E0602
         if afk_time:  # pylint:disable=E0602
             now = datetime.datetime.now()
             datime_since_afk = now - afk_time  # pylint:disable=E0602
