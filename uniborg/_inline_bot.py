@@ -188,6 +188,13 @@ if Config.TG_BOT_USER_NAME_BF_HER is not None and tgbot is not None:
                         buttons=inline_keyboard,
                         link_preview=True
                     )
+        elif query.startswith("tb_btn"):
+            result = builder.article(
+                "Button Parser © @UniBorg",
+                text=f"powered by @UniBorg",
+                buttons=[],
+                link_preview=True
+            )
         else:
             result = builder.article(
                 "© @UniBorg",
