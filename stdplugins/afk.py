@@ -40,6 +40,12 @@ async def set_not_afk(event):
 async def _(event):
     if event.fwd_from:
         return
+    global USER_AFK  # pylint:disable=E0602
+    global afk_time  # pylint:disable=E0602
+    global last_afk_message  # pylint:disable=E0602
+    USER_AFK = {}
+    afk_time = None
+    last_afk_message = {}
     reason = event.pattern_match.group(1)
     if not USER_AFK:  # pylint:disable=E0602
         last_seen_status = await borg(  # pylint:disable=E0602
