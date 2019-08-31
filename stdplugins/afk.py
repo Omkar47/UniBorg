@@ -16,6 +16,9 @@ last_afk_message = {}
 
 @borg.on(events.NewMessage(outgoing=True))  # pylint:disable=E0602
 async def set_not_afk(event):
+    global USER_AFK  # pylint:disable=E0602
+    global afk_time  # pylint:disable=E0602
+    global last_afk_message  # pylint:disable=E0602
     current_message = event.message.message
     if ".afk" not in current_message and "yes" in USER_AFK:  # pylint:disable=E0602
         try:
@@ -79,6 +82,9 @@ async def _(event):
 async def on_afk(event):
     if event.fwd_from:
         return
+    global USER_AFK  # pylint:disable=E0602
+    global afk_time  # pylint:disable=E0602
+    global last_afk_message  # pylint:disable=E0602
     afk_since = "**a while ago**"
     current_message_text = event.message.message.lower()
     if "afk" in current_message_text:
