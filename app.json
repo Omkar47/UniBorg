@@ -47,7 +47,7 @@
       "required": false
     },
     "YOUTUBE_API_KEY": {
-      "description": "Get your api key from https://console.developers.google.com/apis/api/youtube.googleapis.com/credentials?project=snapstart",
+      "description": "Get your api key from https://da.gd/VxwW6",
       "required": false
     },
     "SCREEN_SHOT_LAYER_ACCESS_KEY": {
