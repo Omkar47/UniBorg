@@ -6,9 +6,10 @@ Pluggable [``asyncio``](https://docs.python.org/3/library/asyncio.html)
 
 ## installing
 
-#### The Easy Way
+#### The Easy Ways
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+[![Deploy to now](https://deploy.now.sh/static/button.svg)](https://deploy.now.sh/?repo=https://github.com/SnapDragon7410/UniBorg)
 
 #### The Legacy Way
 Simply clone the repository and run the main file:
