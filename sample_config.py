@@ -107,6 +107,10 @@ class Config(object):
     G_DRIVE_AUTH_TOKEN_DATA = os.environ.get("G_DRIVE_AUTH_TOKEN_DATA", None)
     YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY", None)
     GDRIVE_FOLDER_ID = os.environ.get("GDRIVE_FOLDER_ID", None)
+    #MongoDB
+    MONGO_URI = os.environ.get("MONGO_URI", None)
+    #Lydia API
+    LYDIA_API = os.environ.get("LYDIA_API",None)
     
 
 class Production(Config):
