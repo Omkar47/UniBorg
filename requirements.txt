@@ -1,4 +1,5 @@
 telethon
 lxml
 aria2p
+coffeehouse==1.0.4
 -r ./requirements-stdborg.txt
