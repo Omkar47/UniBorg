@@ -5,6 +5,7 @@ beautifulsoup4
 cfscrape
 cryptg
 dnspython
+py-cpuinfo
 emoji
 googletrans
 google_images_download
