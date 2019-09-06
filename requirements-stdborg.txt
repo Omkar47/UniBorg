@@ -16,6 +16,7 @@ pymongo
 pySmartDL
 python-barcode
 python-magic
+psutil
 qrcode
 regex
 requests
