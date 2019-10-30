@@ -1,10 +1,10 @@
 """Upload local Files to gDrive
 Syntax:
-.gdrive
-.sdrive
-.gfolder
-.drive delete | get
-.gclear """
+.gdrive2
+.sdrive2
+.gfolder2
+.drive2 delete | get
+.gclear2 """
 
 # The entire code given below is verbatim copied from
 # https://github.com/cyberboysumanjay/Gdrivedownloader/blob/master/gdrive_upload.py
@@ -45,7 +45,7 @@ G_DRIVE_F_PARENT_ID = None
 G_DRIVE_DIR_MIME_TYPE = "application/vnd.google-apps.folder"
 
 
-@borg.on(admin_cmd(pattern="gdrive ?(.*)", allow_sudo=True))
+@borg.on(admin_cmd(pattern="gdrive2 ?(.*)", allow_sudo=True))
 async def _(event):
     if event.fwd_from:
         return
@@ -115,7 +115,7 @@ async def _(event):
         await mone.edit("File Not found in local server. Give me a file path :((")
 
 
-@borg.on(admin_cmd(pattern="gfolder https?://drive\.google\.com/drive/u/\d/folders/([-\w]{25,})", allow_sudo=True))
+@borg.on(admin_cmd(pattern="gfolder2 https?://drive\.google\.com/drive/u/\d/folders/([-\w]{25,})", allow_sudo=True))
 async def _(event):
     if event.fwd_from:
         return
@@ -126,10 +126,10 @@ async def _(event):
         await mone.edit(f"Custom Folder ID set successfully. The next uploads will upload to {G_DRIVE_F_PARENT_ID} till `.gdriveclear`")
         await event.delete()
     else:
-        await mone.edit("Send `.gdrivesp https://drive.google.com/drive/u/X/folders/Y` to set the folder to upload new files to")
+        await mone.edit("Send `.gdrivesp2 https://drive.google.com/drive/u/X/folders/Y` to set the folder to upload new files to")
 
 
-@borg.on(admin_cmd(pattern="gclear", allow_sudo=True))
+@borg.on(admin_cmd(pattern="gclear2", allow_sudo=True))
 async def _(event):
     if event.fwd_from:
         return
@@ -139,7 +139,7 @@ async def _(event):
     await event.delete()
 
 
-@borg.on(admin_cmd(pattern="gdir ?(.*)", allow_sudo=True))
+@borg.on(admin_cmd(pattern="gdir 2?(.*)", allow_sudo=True))
 async def _(event):
     if event.fwd_from:
         return
@@ -172,7 +172,7 @@ async def _(event):
         await mone.edit(f"directory {input_str} does not seem to exist")
 
 
-@borg.on(admin_cmd(pattern="drive (delete|get) ?(.*)", allow_sudo=True))
+@borg.on(admin_cmd(pattern="drive 2(delete|get) ?(.*)", allow_sudo=True))
 async def _(event):
     if event.fwd_from:
         return
@@ -204,7 +204,7 @@ async def _(event):
     await mone.edit(response_from_svc)
 
 
-@borg.on(admin_cmd(pattern="sdrive ?(.*)", allow_sudo=True))
+@borg.on(admin_cmd(pattern="sdrive 2?(.*)", allow_sudo=True))
 async def _(event):
     if event.fwd_from:
         return
